@@ -15,14 +15,22 @@ class Game:
         self.screen = pg.display.set_mode((WIDTH, HEIGHT))
         pg.display.set_caption(TITLE)
         self.clock = pg.time.Clock()
+        self.all_sprites = None
+        self.platforms_group = None
+        self.player = None
+        self.playing = False
 
     def new(self):
         # Start a new game
         self.all_sprites = pg.sprite.Group()
-        self.player = Player()
+        self.platforms_group = pg.sprite.Group()
+        self.player = Player(self)
         self.all_sprites.add(self.player)
+        for p in PLATFORM_LIST:
+            platform = Platform(*p)
+            self.platforms_group.add(platform)
+            self.all_sprites.add(platform)
         self.run()
-        
 
     def run(self):
         # Game loop  
@@ -37,6 +45,12 @@ class Game:
     def update(self):
         # Game loop update
         self.all_sprites.update()
+        # Check if player hits a platform only if falling
+        if self.player.velocity.y > 0:
+            hits = pg.sprite.spritecollide(self.player, self.platforms_group, False)
+            if hits:
+                self.player.position.y = hits[0].rect.top
+                self.player.velocity.y = 0  # Tell the player it is standing on a platform
     
     def event(self):
         for event in pg.event.get():
@@ -44,6 +58,9 @@ class Game:
                 if self.playing:
                     self.playing = False
                 self.running = False
+            if event.type == pg.KEYDOWN:
+                if event.key == pg.K_SPACE:
+                    self.player.jump()
     
     def draw(self):
         # Game loop draw
