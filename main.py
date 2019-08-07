@@ -51,7 +51,30 @@ class Game:
             if hits:
                 self.player.position.y = hits[0].rect.top
                 self.player.velocity.y = 0  # Tell the player it is standing on a platform
-    
+
+        # If Player is top 3/4 of screen move
+        if self.player.rect.top < HEIGHT / 4:
+            self.player.position.y += abs(self.player.velocity.y)
+            for plat in self.platforms_group:
+                plat.rect.y += abs(self.player.velocity.y)
+                if plat.rect.top > HEIGHT:
+                    plat.kill()
+                    self.new_platform()
+
+        # if self.player.rect.bottom > (HEIGHT / 4) * 3:
+        #    self.player.position.y -= abs(self.player.velocity.y)
+        #    for plat in self.platforms_group:
+        #        plat.rect.y -= abs(self.player.velocity.y)
+
+    def new_platform(self):
+        width = random.randrange(50,120)
+        height = 20
+        x = random.randrange(0, WIDTH - width)
+        y = random.randrange(-75, -30)
+        p = Platform(x, y, width, height)
+        self.all_sprites.add(p)
+        self.platforms_group.add(p)
+
     def event(self):
         for event in pg.event.get():
             if event.type == pg.QUIT:
